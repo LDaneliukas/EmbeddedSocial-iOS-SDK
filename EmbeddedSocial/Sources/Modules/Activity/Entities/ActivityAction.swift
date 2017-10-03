@@ -88,7 +88,6 @@ class TransitionAction: Action {
     
 }
 
-
 class ActivityActionBuilder {
     
     weak var presenter: ActivityPresenter!
