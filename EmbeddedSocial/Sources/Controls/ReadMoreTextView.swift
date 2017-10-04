@@ -65,6 +65,7 @@ class ReadMoreTextView: UITextView {
     
     override var text: String! {
         didSet {
+            print("new text for textview \(text)")
             if let text = text {
                 _originalAttributedText = attributedStringWithDefaultAttributes(from: text)
             } else {

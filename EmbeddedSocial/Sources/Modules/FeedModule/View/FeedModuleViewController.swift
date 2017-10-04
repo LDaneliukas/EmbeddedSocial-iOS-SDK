@@ -292,6 +292,7 @@ class FeedModuleViewController: UIViewController, FeedModuleViewInput {
     }
     
     func getViewHeight() -> CGFloat {
+        print("module height \(collectionView.collectionViewLayout.collectionViewContentSize.height)")
         return collectionView.collectionViewLayout.collectionViewContentSize.height
     }
     
@@ -378,7 +379,7 @@ extension FeedModuleViewController: UICollectionViewDelegate, UICollectionViewDa
         }
         
         cell.configure(with: item, collectionView: collectionView)
-        
+                
         return cell as! UICollectionViewCell
     }
     

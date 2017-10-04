@@ -11,6 +11,7 @@ class PostCell: UICollectionViewCell, PostCellProtocol {
     @IBOutlet weak var postImageHeight: NSLayoutConstraint!
     @IBOutlet var staticHeigthElements: [UIView]!
     @IBOutlet var dynamicElement: UIView!
+    @IBOutlet var HACK: NSLayoutConstraint!
     
     @IBOutlet weak var likeButton: UIButton!
     @IBOutlet weak var pinButton: UIButton!
@@ -85,6 +86,10 @@ class PostCell: UICollectionViewCell, PostCellProtocol {
     }
     
     override func layoutSubviews() {
+        
+        let sz = postText.sizeThatFits(CGSize(width: bounds.width, height: 10000))
+        self.HACK.constant = sz.height
+        
         super.layoutSubviews()
         userPhoto.layer.cornerRadius = userPhoto.layer.bounds.height / 2
     }
@@ -105,10 +110,13 @@ class PostCell: UICollectionViewCell, PostCellProtocol {
     }
     
     override func prepareForReuse() {
+        super.prepareForReuse()
         viewModel = nil
         userName.text = nil
         postTitle.text = nil
+        postText.text = nil
         postCreation.text = nil
+        postText.setNeedsLayout()
         likedCount.text = nil
         commentedCount.text = nil
         postText.readMoreTapHandle = nil
@@ -117,8 +125,7 @@ class PostCell: UICollectionViewCell, PostCellProtocol {
         postImageButton.setPhotoWithCaching(nil, placeholder: nil)
         userPhoto.setPhotoWithCaching(nil, placeholder: nil)
         postImageHeight.constant = Constants.FeedModule.Collection.imageHeight
-        
-        super.prepareForReuse()
+
     }
     
     func configure(with data: PostViewModel, collectionView: UICollectionView?) {
@@ -175,10 +182,16 @@ class PostCell: UICollectionViewCell, PostCellProtocol {
             staticElementsHeight -= Constants.FeedModule.Collection.imageHeight
         }
         
+        let sz = postText.sizeThatFits(CGSize(width: width, height: 10000))
+        HACK.constant = sz.height
+        
         // append text view height (Optimization possible)
-        let dynamicHeight = dynamicElement.systemLayoutSizeFitting(self.bounds.size).height
-    
+        let bounds = CGSize(width: width, height: .greatestFiniteMagnitude)
+        let dynamicHeight = dynamicElement.systemLayoutSizeFitting(bounds).height
+        
         var result = [staticElementsHeight, dynamicHeight].reduce(0.0, +)
+        
+        print("cell height for \(postText.text) is \(postText.intrinsicContentSize)")
         
         return result
     }

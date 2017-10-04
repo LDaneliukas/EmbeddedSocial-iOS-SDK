@@ -68,9 +68,9 @@ extension Post {
         let handle = "Handle\(seed)"
         let title = "Title \(seed)"
         var text = "Post text"
-        for i in 0...seed {
-            text += "\n \(i)"
-        }
+//        for i in 0...seed {
+//            text += "\n \(i)"
+//        }
         
         let liked = false
         let pinned = false
