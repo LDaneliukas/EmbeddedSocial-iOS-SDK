@@ -114,7 +114,6 @@ class FeedModuleViewController: UIViewController, FeedModuleViewInput {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        
         // disable prefetching so cells are configured as they come on screen
         if #available(iOS 10.0, *) {
             collectionView.isPrefetchingEnabled = false
@@ -165,8 +164,19 @@ class FeedModuleViewController: UIViewController, FeedModuleViewInput {
     
     private func onUpdateLayout(type: FeedModuleLayoutType, animated: Bool = false) {
         
+        Logger.log("changing to",
+                   self.collectionView.indexPathsForVisibleItems.count,
+                   self.output.numberOfItems(),
+                   type, event: .veryImportant)
+        UIView.setAnimationsEnabled(false)
         self.collectionView.reloadData()
+        let visible = self.collectionView.indexPathsForVisibleItems
+        if visible.count > 0 {
+            self.collectionView.reloadItems(at: visible)
+        }
+        
         self.collectionView.collectionViewLayout.invalidateLayout()
+        
         
         // switch layout
         switch type {
@@ -184,7 +194,7 @@ class FeedModuleViewController: UIViewController, FeedModuleViewInput {
             }
         }
         
-        
+        UIView.setAnimationsEnabled(true)
     }
     
     private func onUpdateBounds() {
@@ -344,9 +354,9 @@ class FeedModuleViewController: UIViewController, FeedModuleViewInput {
     
     func insertNewItems(with paths:[IndexPath]) {
         Logger.log(paths, event: .veryImportant)
-        
+        UIView.setAnimationsEnabled(false)
         self.collectionView.insertItems(at: paths)
-        
+        UIView.setAnimationsEnabled(true)
     }
     
     func removeItems(with paths: [IndexPath]) {
@@ -357,9 +367,9 @@ class FeedModuleViewController: UIViewController, FeedModuleViewInput {
     func reload() {
         Logger.log(output.numberOfItems(), collectionView.indexPathsForVisibleItems.count , event: .veryImportant)
         
-        UIView.performWithoutAnimation {
-            self.collectionView.reloadSections([0])
-        }
+        UIView.setAnimationsEnabled(false)
+        self.collectionView.reloadSections([0])
+        UIView.setAnimationsEnabled(true)
     }
     
     func reload(with index: Int) {

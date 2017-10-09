@@ -231,14 +231,10 @@ class FeedModulePresenter: FeedModuleInput, FeedModuleViewOutput, FeedModuleInte
     }
     
     private func onLayoutTypeChange() {
-        
         // Invalidate subsequent responses
         fetchRequestsInProgress = Set()
-        pages = []
-        view.reload()
         view.setLayout(type: self.layout)
         view.paddingEnabled = collectionPaddingNeeded()
-        fetchAllItems()
     }
     
     private func onFeedTypeChange() {
@@ -462,13 +458,11 @@ class FeedModulePresenter: FeedModuleInput, FeedModuleViewOutput, FeedModuleInte
     // MARK: FeedModuleInteractorOutput
     
     fileprivate func addPage(_ page: FeedPage) {
-        Logger.log(page, event: .veryImportant)
         assert(pageExists(page) == false)
         pages.append(page)
     }
     
     fileprivate func updatePage(_ page: FeedPage) {
-        Logger.log(page, event: .veryImportant)
         let index = pages.index(of: page)!
         pages[index] = page
     }
@@ -478,7 +472,6 @@ class FeedModulePresenter: FeedModuleInput, FeedModuleViewOutput, FeedModuleInte
     }
     
     fileprivate func removePage(_ page: FeedPage) {
-        Logger.log(page, event: .veryImportant)
         let index = pages.index(of: page)!
         pages.remove(at: index)
 
