@@ -170,10 +170,8 @@ class FeedModuleViewController: UIViewController, FeedModuleViewInput {
             print(self.output.item(for: IndexPath(row: i, section: 0)).cellType)
         }
     
-            self.collectionView.collectionViewLayout.invalidateLayout()
             self.collectionView.reloadData()
-            self.collectionView.layoutIfNeeded()
-            self.collectionView.collectionViewLayout.invalidateLayout()
+        
             
             // switch layout
             switch type {
