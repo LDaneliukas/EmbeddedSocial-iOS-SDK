@@ -4,12 +4,13 @@
 //
 
 import Foundation
+import IGListKit
 
 protocol PostViewModelActionsProtocol: class {
     func handle(action: FeedPostCellAction, path: IndexPath)
 }
 
-struct PostViewModel {
+class PostViewModel {
     
     typealias ActionHandler = (FeedPostCellAction, IndexPath) -> Void
     
@@ -62,6 +63,27 @@ struct PostViewModel {
         
         self.cellType = cellType
         onAction = actionHandler
+    }
+}
+
+extension PostViewModel: ListDiffable {
+    
+    func diffIdentifier() -> NSObjectProtocol {
+        return topicHandle as NSObjectProtocol
+    }
+    
+    func isEqual(toDiffableObject object: ListDiffable?) -> Bool {
+        guard self !== object else { return true }
+        guard let object = object as? PostViewModel else { return false }
+        return topicHandle == object.topicHandle &&
+            isLiked == object.isLiked &&
+            isPinned == object.isPinned &&
+            totalLikes == object.totalLikes &&
+            totalComments == object.totalComments &&
+            timeCreated == object.timeCreated &&
+            text == object.text &&
+            title == object.text
+        // TODO: continue this
     }
     
 }

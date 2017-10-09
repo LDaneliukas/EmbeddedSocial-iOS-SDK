@@ -4,6 +4,7 @@
 //
 
 import Foundation
+import IGListKit
 
 struct Post {
     var topicHandle: String
@@ -200,11 +201,36 @@ extension Post {
 }
 
 // MARK: Feed
-struct Feed {
-    var fetchID: String
-    var feedType: FeedType
-    var items: [Post]
+class Feed {
+    var fetchID: String!
+    var feedType: FeedType!
+    var items: [Post] = []
     var cursor: String? = nil
+    
+    init(fetchID: String = UUID().uuidString, feedType: FeedType, items: [Post] = [], cursor: String? = nil) {
+        self.fetchID = fetchID
+        self.feedType = feedType
+        self.items = items
+        self.cursor = cursor
+    }
+    
+}
+
+extension Feed: ListDiffable {
+    
+    func diffIdentifier() -> NSObjectProtocol {
+        return fetchID as NSObjectProtocol
+    }
+    
+    func isEqual(toDiffableObject object: ListDiffable?) -> Bool {
+        guard self !== object else { return true }
+        guard let object = object as? Feed else { return false }
+        return items == object.items
+            && feedType == object.feedType
+            && cursor == object.cursor
+            && fetchID == object.fetchID
+    }
+    
 }
 
 // MARK: Service Query Result

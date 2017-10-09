@@ -3,7 +3,9 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 //
 
-protocol FeedModuleViewOutput {
+import IGListKit
+
+protocol FeedModuleViewOutput: ListAdapterDataSource {
 
     func viewIsReady()
     func viewDidAppear()
@@ -21,4 +23,8 @@ protocol FeedModuleViewOutput {
     
     func configureHeader(_ headerView: UICollectionReusableView)
     var headerSize: CGSize { get }
+    
+    func objects(for listAdapter: ListAdapter) -> [ListDiffable]
+    func listAdapter(_ listAdapter: ListAdapter, sectionControllerFor object: Any) -> ListSectionController
 }
+

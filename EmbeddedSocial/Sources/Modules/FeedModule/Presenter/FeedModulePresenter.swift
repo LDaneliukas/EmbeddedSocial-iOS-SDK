@@ -3,6 +3,8 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 //
 
+import IGListKit
+
 protocol FeedModuleInput: class {
 
     // Forces module to fetch all feed
@@ -148,7 +150,11 @@ enum FeedModuleLayoutType: Int {
     }
 }
 
-class FeedModulePresenter: FeedModuleInput, FeedModuleViewOutput, FeedModuleInteractorOutput, PostViewModelActionsProtocol {
+class FeedModulePresenter: NSObject, FeedModuleInput, FeedModuleViewOutput, FeedModuleInteractorOutput, PostViewModelActionsProtocol {
+    
+    func emptyView(for listAdapter: ListAdapter) -> UIView? {
+        return nil
+    }
     
     weak var view: FeedModuleViewInput!
     var interactor: FeedModuleInteractorInput!
@@ -499,6 +505,7 @@ class FeedModulePresenter: FeedModuleInput, FeedModuleViewOutput, FeedModuleInte
         
         defer {
             checkIfNoContent()
+            view.update()
         }
     
         Logger.log(feed.fetchID, event: .veryImportant)
@@ -508,7 +515,7 @@ class FeedModulePresenter: FeedModuleInput, FeedModuleViewOutput, FeedModuleInte
         // its full reload
         if pages.count == 0  {
             addPage(page)
-            view.reload()
+//            view.reload()
             return
         }
         
@@ -521,13 +528,13 @@ class FeedModulePresenter: FeedModuleInput, FeedModuleViewOutput, FeedModuleInte
             
             addPage(page)
             let toInsert = indexesForPage(page)
-            view.update(toRemove: toRemove, toInsert: toInsert)
+//            view.update(toRemove: toRemove, toInsert: toInsert)
         }
         else {
             
             addPage(page)
             let indexes = indexesForPage(page)
-            view.insertNewItems(with: indexes)
+//            view.insertNewItems(with: indexes)
         }
     }
     
@@ -698,5 +705,42 @@ extension FeedModulePresenter: PostMenuModuleOutput {
     private func didFail(_ error: Error) {
         view.showError(error: error)
     }
+}
+
+extension FeedModulePresenter {
+    
+    func objects(for listAdapter: ListAdapter) -> [ListDiffable] {
+        let posts = pages.flatMap { $0.response.items }
+        let viewModels = posts.map { PostViewModel(with: $0, cellType: layout.cellType) }
+        return viewModels as [ListDiffable]
+    }
+    
+    func listAdapter(_ listAdapter: ListAdapter, sectionControllerFor object: Any) -> ListSectionController {
+        return FeedSectionController()
+    }
+}
+
+final class FeedSectionController: ListSectionController {
+    
+    private var post: PostViewModel?
+    
+    override func sizeForItem(at index: Int) -> CGSize {
+        return CGSize(width: collectionContext!.containerSize.width, height: 55)
+    }
+    
+    override func cellForItem(at index: Int) -> UICollectionViewCell {
+        guard let cell = collectionContext?.dequeueReusableCell(of: PostCell.self, for: self, at: index) as? PostCell else {
+            fatalError()
+        }
+
+        cell.configure(with: post!, collectionView: nil)
+        
+        return cell
+    }
+    
+    override func didUpdate(to object: Any) {
+        self.post = object as? PostViewModel
+    }
+    
 }
 

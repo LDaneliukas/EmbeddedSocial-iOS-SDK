@@ -53,6 +53,7 @@ class FeedModuleInteractor: FeedModuleInteractorInput {
         }
         
         let feed = Feed(fetchID: request.uid, feedType: request.feedType, items: result.posts, cursor: result.cursor)
+    
         
         if isLoadingMore {
            output.didFetchMore(feed: feed)

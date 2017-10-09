@@ -25,6 +25,7 @@ abstract_target 'Group' do
     pod 'OAuthSwift', :path => 'EmbeddedSocial/Vendor/OAuthSwift'
     pod 'LiveSDK', :path => 'EmbeddedSocial/Vendor/LiveSDK'
     pod 'SKPhotoBrowser', '4.0.1'
+    pod 'IGListKit'
     facebook
 
     target 'EmbeddedSocial' do

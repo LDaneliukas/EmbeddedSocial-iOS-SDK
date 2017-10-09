@@ -5,12 +5,14 @@
 
 import UIKit
 import SVProgressHUD
+import IGListKit
 
 protocol FeedModuleViewInput: class {
     
     func setupInitialState()
     func setLayout(type: FeedModuleLayoutType)
     func resetFocus()
+    func update()
     func reload()
     func reload(with index: Int)
     func reloadVisible()
@@ -38,6 +40,10 @@ protocol FeedModuleViewInput: class {
 class FeedModuleViewController: UIViewController, FeedModuleViewInput {
     
     var output: FeedModuleViewOutput!
+    
+    lazy var adapter: ListAdapter = {
+        return ListAdapter(updater: ListAdapterUpdater(), viewController: self)
+    }()
     
     var numberOfItems: Int {
         return collectionView.numberOfItems(inSection: 0)
@@ -157,6 +163,8 @@ class FeedModuleViewController: UIViewController, FeedModuleViewInput {
         collectionView.register(PostCellCompact.nib, forCellWithReuseIdentifier: PostCellCompact.reuseID)
         collectionView.delegate = self
         
+        adapter.dataSource = output
+        adapter.collectionView = collectionView
         
         // Navigation
         navigationItem.rightBarButtonItem = layoutChangeButton
@@ -407,6 +415,10 @@ class FeedModuleViewController: UIViewController, FeedModuleViewInput {
         }) { (finished) in
             self.didFinishCollectionViewAnimation()
         }
+    }
+    
+    func update() {
+        adapter.performUpdates(animated: true, completion: nil)
     }
     
     func reload() {
