@@ -160,6 +160,8 @@ class FeedModuleViewController: UIViewController, FeedModuleViewInput {
     
     private func onUpdateLayout(type: FeedModuleLayoutType, animated: Bool = false) {
         
+        Logger.log("visible:", self.collectionView.indexPathsForVisibleItems.count, "available:", self.output.numberOfItems(), event: .veryImportant)
+        collectionView.reloadData()
         collectionView.collectionViewLayout.invalidateLayout()
     
         // switch layout
@@ -167,16 +169,18 @@ class FeedModuleViewController: UIViewController, FeedModuleViewInput {
         case .grid:
             layoutChangeButton.image = UIImage(asset: .iconList)
             if collectionView.collectionViewLayout != gridLayout {
+                Logger.log("changed layout", type, event: .veryImportant)
                 collectionView.setCollectionViewLayout(gridLayout, animated: animated)
             }
         case .list:
             layoutChangeButton.image = UIImage(asset: .iconGallery)
             if collectionView.collectionViewLayout != listLayout {
+                Logger.log("changed layout", type, event: .veryImportant)
                 collectionView.setCollectionViewLayout(listLayout, animated: animated)
             }
         }
         
-        collectionView.reloadData()
+        
     }
     
     private func onUpdateBounds() {
@@ -327,9 +331,16 @@ class FeedModuleViewController: UIViewController, FeedModuleViewInput {
     }
     
     func reloadVisible() {
-        Logger.log(event: .veryImportant)
+        
         let paths = collectionView.indexPathsForVisibleItems
-        self.collectionView.reloadItems(at: paths)
+    
+        Logger.log(paths, event: .veryImportant)
+        
+        self.collectionView.performBatchUpdates({ 
+            self.collectionView.reloadItems(at: paths)
+        }, completion: { (completed) in
+            Logger.log("reload visible:", self.collectionView.indexPathsForVisibleItems.count, "available:", self.output.numberOfItems(), event: .veryImportant)
+        })
     }
     
     func insertNewItems(with paths:[IndexPath]) {
@@ -343,7 +354,7 @@ class FeedModuleViewController: UIViewController, FeedModuleViewInput {
     }
     
     func reload() {
-        Logger.log(event: .veryImportant)
+        Logger.log("visible:", self.collectionView.indexPathsForVisibleItems.count, "available:", self.output.numberOfItems(), event: .veryImportant)
         collectionView.reloadData()
     }
     
@@ -372,6 +383,8 @@ extension FeedModuleViewController: UICollectionViewDelegate, UICollectionViewDa
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         
         let item = output.item(for: indexPath)
+        
+        Logger.log("cell ->", indexPath, item.cellType, event: .veryImportant)
         
         guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: item.cellType, for: indexPath) as? PostCellProtocol else {
             fatalError("Wrong cell")
