@@ -39,7 +39,7 @@ class FeedModuleViewController: UIViewController, FeedModuleViewInput {
     var output: FeedModuleViewOutput!
     
     var numberOfItems: Int {
-        return collectionView?.numberOfItems(inSection: 0) ?? 0
+        return collectionView.numberOfItems(inSection: 0)
     }
     
     var paddingEnabled: Bool = false {
@@ -132,15 +132,21 @@ class FeedModuleViewController: UIViewController, FeedModuleViewInput {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        
+        // disable prefetching so cells are configured as they come on screen
+        if #available(iOS 10.0, *) {
+            collectionView.isPrefetchingEnabled = false
+        }
+    
         // Table
-        self.collectionView.register(PostCell.nib, forCellWithReuseIdentifier: PostCell.reuseID)
-        self.collectionView.register(PostCellCompact.nib, forCellWithReuseIdentifier: PostCellCompact.reuseID)
-        self.collectionView.delegate = self
         collectionView.register(UICollectionReusableView.self, forSupplementaryViewOfKind: UICollectionElementKindSectionFooter, withReuseIdentifier: footerReuseID)
+        collectionView.register(PostCell.nib, forCellWithReuseIdentifier: PostCell.reuseID)
+        collectionView.register(PostCellCompact.nib, forCellWithReuseIdentifier: PostCellCompact.reuseID)
+        collectionView.delegate = self
+        
         
         // Navigation
         navigationItem.rightBarButtonItem = layoutChangeButton
-        
         
         // Subviews
         view.addSubview(noContentLabel)
@@ -184,14 +190,16 @@ class FeedModuleViewController: UIViewController, FeedModuleViewInput {
         // switch layout
         switch type {
         case .grid:
-            layoutChangeButton.image = UIImage(asset: .iconList)
-            if collectionView.collectionViewLayout != gridLayout {
-                collectionView.setCollectionViewLayout(gridLayout, animated: animated)
+            self.layoutChangeButton.image = UIImage(asset: .iconList)
+            if self.collectionView.collectionViewLayout != self.gridLayout {
+                self.collectionView.setCollectionViewLayout(self.gridLayout, animated: animated)
+                Logger.log("changed", type, event: .veryImportant)
             }
         case .list:
-            layoutChangeButton.image = UIImage(asset: .iconGallery)
-            if collectionView.collectionViewLayout != listLayout {
-                collectionView.setCollectionViewLayout(listLayout, animated: animated)
+            self.layoutChangeButton.image = UIImage(asset: .iconGallery)
+            if self.collectionView.collectionViewLayout != self.listLayout {
+                self.collectionView.setCollectionViewLayout(self.listLayout, animated: animated)
+                Logger.log("changed", type, event: .veryImportant)
             }
         }
     }
@@ -407,12 +415,14 @@ extension FeedModuleViewController: UICollectionViewDelegate, UICollectionViewDa
         
         let item = output.item(for: indexPath)
         
+        Logger.log(indexPath, item.cellType, event: .veryImportant)
+        
         guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: item.cellType, for: indexPath) as? PostCellProtocol else {
             fatalError("Wrong cell")
         }
         
         (cell as? Themeable)?.apply(theme: theme)
-
+        
         cell.configure(with: item, collectionView: collectionView)
         
         return cell as! UICollectionViewCell
@@ -425,12 +435,17 @@ extension FeedModuleViewController: UICollectionViewDelegate, UICollectionViewDa
         if collectionViewLayout === listLayout {
             
             let item = output.item(for: indexPath)
-            return calculateCellSizeWith(viewModel: item)
+            let size = calculateCellSizeWith(viewModel: item)
+            
+            //            Logger.log("sizing will be", size, event: .veryImportant)
+            
+            return size
             
         } else if collectionViewLayout === gridLayout {
+            //            Logger.log("sizing will be", gridLayout.itemSize, event: .veryImportant)
             return gridLayout.itemSize
         } else {
-            fatalError("Unexpected")
+            return CGSize.zero
         }
     }
     
@@ -452,6 +467,7 @@ extension FeedModuleViewController: UICollectionViewDelegate, UICollectionViewDa
             return CGSize.zero
         }
     }
+    
     
     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
         
