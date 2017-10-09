@@ -145,10 +145,10 @@ class PostCell: UICollectionViewCell, PostCellProtocol {
         }
         
         let downloadablePostImage = Photo(url: data.postImageUrl)
-        postImageButton.setPhotoWithCaching(downloadablePostImage, placeholder: postImagePlaceholder)
+        //postImageButton.setPhotoWithCaching(downloadablePostImage, placeholder: postImagePlaceholder)
         
         let downloadableUserImage = Photo(url: data.userImageUrl)
-        userPhoto.setPhotoWithCaching(downloadableUserImage, placeholder: userImagePlaceholder)
+//        userPhoto.setPhotoWithCaching(downloadableUserImage, placeholder: userImagePlaceholder)
         
         userName.text = data.userName
         postTitle.text = data.title

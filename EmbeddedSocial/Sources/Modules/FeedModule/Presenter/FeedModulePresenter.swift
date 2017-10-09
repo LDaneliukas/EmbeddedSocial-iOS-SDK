@@ -729,8 +729,9 @@ final class FeedSectionController: ListSectionController {
     }
     
     override func cellForItem(at index: Int) -> UICollectionViewCell {
-        guard let cell = collectionContext?.dequeueReusableCell(of: PostCell.self, for: self, at: index) as? PostCell else {
-            fatalError()
+        guard let cell = collectionContext?.dequeueReusableCell(withNibName: PostCell.nibName, bundle: PostCell.bundle, for: self, at: index) as? PostCell
+            else {
+                fatalError()
         }
 
         cell.configure(with: post!, collectionView: nil)

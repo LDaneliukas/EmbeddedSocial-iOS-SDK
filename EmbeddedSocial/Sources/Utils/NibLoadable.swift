@@ -19,4 +19,12 @@ extension UICollectionViewCell: NibLoadable {
     class var nib: UINib {
         return UINib(nibName: String(describing: self), bundle: Bundle(for: self))
     }
+    
+    class var nibName: String {
+        return String(describing: self)
+    }
+    
+    class var bundle: Bundle {
+        return Bundle(for: self)
+    }
 }
