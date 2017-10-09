@@ -515,14 +515,13 @@ class FeedModulePresenter: FeedModuleInput, FeedModuleViewOutput, FeedModuleInte
         let isPageExist = pageExists(page)
         
         if isPageExist {
-            // remove old items for existing page
-            let indexes = indexesForPage(page)
-            removePage(page)
-            view.removeItems(with: indexes)
             
-            // insert items for updated page
+            let toRemove = indexesForPage(page)
+            removePage(page)
+            
             addPage(page)
-            view.insertNewItems(with: indexesForPage(page))
+            let toInsert = indexesForPage(page)
+            view.update(toRemove: toRemove, toInsert: toInsert)
         }
         else {
             

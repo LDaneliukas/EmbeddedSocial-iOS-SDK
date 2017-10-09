@@ -16,6 +16,7 @@ protocol FeedModuleViewInput: class {
     func reloadVisible()
     func insertNewItems(with paths: [IndexPath])
     func removeItems(with paths: [IndexPath])
+    func update(toRemove: [IndexPath], toInsert: [IndexPath])
     // Turns off "pull to refresh"
     func setRefreshing(state: Bool)
     // Turns on/off loading indicator
@@ -73,7 +74,19 @@ class FeedModuleViewController: UIViewController, FeedModuleViewInput {
     fileprivate var collectionViewAnimations = 0 {
         didSet {
             assert(collectionViewAnimations >= 0)
+            checkNeedsChangeLayout()
         }
+    }
+    
+    fileprivate var nextLayout: FeedModuleLayoutType?
+    fileprivate func checkNeedsChangeLayout() {
+        
+        guard let layout = nextLayout, canChangeLayout() == true else {
+            return
+        }
+        
+        onUpdateLayout(type: layout)
+        nextLayout = nil
     }
     
     fileprivate func didStartCollectionViewAnimation() {
@@ -281,6 +294,7 @@ class FeedModuleViewController: UIViewController, FeedModuleViewInput {
         
         // We do not change layout during collection animation.
         guard canChangeLayout() else {
+            print("cant change layout")
             return
         }
         
@@ -325,10 +339,10 @@ class FeedModuleViewController: UIViewController, FeedModuleViewInput {
     func getViewHeight() -> CGFloat {
         return collectionView.collectionViewLayout.collectionViewContentSize.height
     }
-    
+
     func setLayout(type: FeedModuleLayoutType) {
-        // Apply new layout
-        onUpdateLayout(type: type)
+        nextLayout = type
+        checkNeedsChangeLayout()
     }
     
     func refreshLayout() {
@@ -371,6 +385,16 @@ class FeedModuleViewController: UIViewController, FeedModuleViewInput {
         self.didStartCollectionViewAnimation()
         collectionView.performBatchUpdates({
             self.collectionView.insertItems(at: paths)
+        }) { (finished) in
+            self.didFinishCollectionViewAnimation()
+        }
+    }
+    
+    func update(toRemove: [IndexPath], toInsert: [IndexPath]) {
+        self.didStartCollectionViewAnimation()
+        collectionView.performBatchUpdates({
+            self.collectionView.deleteItems(at: toRemove)
+            self.collectionView.insertItems(at: toInsert)
         }) { (finished) in
             self.didFinishCollectionViewAnimation()
         }
