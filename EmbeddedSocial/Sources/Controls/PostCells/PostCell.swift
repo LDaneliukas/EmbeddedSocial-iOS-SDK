@@ -104,11 +104,12 @@ class PostCell: UICollectionViewCell, PostCellProtocol {
         contentView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         container.translatesAutoresizingMaskIntoConstraints = false
         
-        contentView.addSubview(container)
+        //contentView.addSubview(container)
         postImageButton.imageView?.contentMode = .scaleAspectFill
         postText.maximumNumberOfLines = Constants.FeedModule.Collection.Cell.maxLines
         postImageHeight.constant = Constants.FeedModule.Collection.imageHeight
         postText.isScrollEnabled = false
+        isUserInteractionEnabled = false
     }
     
     func setup() {
@@ -135,6 +136,7 @@ class PostCell: UICollectionViewCell, PostCellProtocol {
     }
     
     func configure(with data: PostViewModel, collectionView: UICollectionView?) {
+        
         
         viewModel = data
         self.collectionView = collectionView
