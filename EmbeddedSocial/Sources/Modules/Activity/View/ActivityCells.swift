@@ -160,6 +160,7 @@ class ActivityCell: ActivityBaseCell {
     let postImage: UIImageView = {
         let view = UIImageView()
         view.contentMode = .scaleToFill
+        view.clipsToBounds = true
         return view
     }()
     
