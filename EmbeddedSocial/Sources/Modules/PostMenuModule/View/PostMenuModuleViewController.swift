@@ -74,6 +74,12 @@ class PostMenuModuleViewController: BaseViewController, PostMenuModuleViewInput 
     }()
     
     private func presentActionController() {
+        if let popoverPresentationController = actionController.popoverPresentationController {
+            popoverPresentationController.sourceView = self.view
+            let bounds = UIScreen.main.bounds
+            popoverPresentationController.sourceRect = CGRect(x: bounds.size.height/2, y: bounds.size.width/2, width: 1, height: 1)
+        }
+        
         self.present(actionController, animated: true)
     }
     
