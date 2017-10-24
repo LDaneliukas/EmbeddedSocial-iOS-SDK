@@ -3,6 +3,8 @@
 // Licensed under the MIT License. See LICENSE in the project root for license information.
 //
 
+import BMACollectionBatchUpdates
+
 protocol FeedModuleInput: class {
 
     // Forces module to fetch all feed
@@ -495,8 +497,28 @@ class FeedModulePresenter: FeedModuleInput, FeedModuleViewOutput, FeedModuleInte
         defer {
             checkIfNoContent()
         }
-        
+    
         Logger.log("items arrived", event: .veryImportant)
+        
+        //BMAExampleItemsSection *section = [[BMAExampleItemsSection alloc] initWithId:sectionId items:items];
+        
+        
+        
+        let oldItems = self.items.map { BatchCollectionItem(post: $0) }
+        let oldSection = BatchCollection(uid: "0", items: oldItems)
+        
+        let newItems = feed.items.map { BatchCollectionItem(post: $0) }
+        let newSection = BatchCollection(uid: "0", items: newItems)
+        
+        BMACollectionUpdate.calculateUpdates(forOldModel: [oldSection],
+                                             newModel: [newSection],
+                                             sectionsPriorityOrder: nil,
+                                             eliminatesDuplicates: true) { (sections, updates) in
+                                                
+                                                Logger.log(updates, event: .development)
+                                                
+        }
+        
         
         let cachedNumberOfItems = items.count
         
