@@ -175,6 +175,7 @@ class FeedModulePresenter: FeedModuleInput, FeedModuleViewOutput, FeedModuleInte
     fileprivate var cursor: String? = nil
     fileprivate let limit: Int32 = Int32(Constants.Feed.pageSize)
     fileprivate var items = [Post]()
+    fileprivate let syncQueue = DispatchQueue(label: "FeedSync-queue")
     fileprivate var fetchRequestsInProgress: Set<String> = Set()
     fileprivate var header: SupplementaryItemModel?
     
@@ -294,7 +295,10 @@ class FeedModulePresenter: FeedModuleInput, FeedModuleViewOutput, FeedModuleInte
     
     fileprivate func fetchAllItems() {
         cursor = nil
-        items = []
+        syncQueue.sync {
+            items = []
+        }
+        
         view.reload()
         fetchRequestsInProgress = Set()
         fetchItems()
@@ -496,14 +500,16 @@ class FeedModulePresenter: FeedModuleInput, FeedModuleViewOutput, FeedModuleInte
             checkIfNoContent()
         }
         
-        Logger.log("items arrived", event: .veryImportant)
+        Logger.log("id: \(feed.fetchID) items arrived \(feed.items.count)", event: .veryImportant)
         
         let cachedNumberOfItems = items.count
         
-        if isMore {
-            appendWithReplacing(original: &items, appending: feed.items)
-        } else {
-            items = feed.items
+        syncQueue.sync {
+            if isMore {
+                appendWithReplacing(original: &items, appending: feed.items)
+            } else {
+                items = feed.items
+            }
         }
         
         cursor = feed.cursor
@@ -559,8 +565,8 @@ class FeedModulePresenter: FeedModuleInput, FeedModuleViewOutput, FeedModuleInte
         }
     }
     
-    func didFinishFetching() {
-        Logger.log()
+    func didFinishFetching(handle: String) {
+        Logger.log(handle)
         view.setRefreshing(state: false)
         if let delegate = moduleOutput {
             delegate.didFinishRefreshingData(nil)
@@ -693,7 +699,11 @@ extension FeedModulePresenter: PostMenuModuleOutput {
     private func didRemoveItem(post: PostHandle) {
         if let index = items.index(where: { $0.topicHandle == post }) {
             Logger.log(index)
-            items.remove(at: index)
+            
+            syncQueue.sync {
+                items.remove(at: index)
+            }
+            
             view.removeItems(with: [IndexPath(row: index, section: 0)])
         }
     }

@@ -366,14 +366,18 @@ class FeedModuleViewController: BaseViewController, FeedModuleViewInput {
     
     func removeItems(with paths: [IndexPath]) {
         self.didStartCollectionViewAnimation()
+        
+        Logger.log("removing \(paths.count) from \(self.collectionView.indexPathsForVisibleItems.count)")
         collectionView.performBatchUpdates({
             self.collectionView.deleteItems(at: paths)
         }) { (finished) in
+            Logger.log("removed", paths)
             self.didFinishCollectionViewAnimation()
         }
     }
     
     func reload() {
+        Logger.log("reloading \(collectionView.indexPathsForVisibleItems.count) ")
         self.collectionView.reloadData()
     }
     
