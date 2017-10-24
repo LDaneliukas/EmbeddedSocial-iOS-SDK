@@ -4,6 +4,7 @@
 //
 
 import UIKit
+import BMACollectionBatchUpdates
 
 protocol FeedModuleViewInput: class {
     
@@ -29,6 +30,7 @@ protocol FeedModuleViewInput: class {
     func needShowNoContent(state: Bool)
 
     var paddingEnabled: Bool { get set }
+    func performBatches(updates: [BMACollectionUpdate]?, withSections: [BMAUpdatableCollectionSection])
 }
 
 class FeedModuleViewController: BaseViewController, FeedModuleViewInput {
@@ -178,7 +180,7 @@ class FeedModuleViewController: BaseViewController, FeedModuleViewInput {
     
     private func onUpdateLayout(type: FeedModuleLayoutType, animated: Bool = false) {
         
-        collectionView.reloadData()
+//        collectionView.reloadData()
         collectionView.collectionViewLayout.invalidateLayout()
     
         // switch layout
@@ -346,6 +348,7 @@ class FeedModuleViewController: BaseViewController, FeedModuleViewInput {
     }
     
     func reloadVisible() {
+        return
         let paths = collectionView.indexPathsForVisibleItems
         self.didStartCollectionViewAnimation()
         collectionView.performBatchUpdates({ 
@@ -356,6 +359,7 @@ class FeedModuleViewController: BaseViewController, FeedModuleViewInput {
     }
     
     func insertNewItems(with paths:[IndexPath]) {
+        return
         self.didStartCollectionViewAnimation()
         collectionView.performBatchUpdates({
             self.collectionView.insertItems(at: paths)
@@ -365,6 +369,7 @@ class FeedModuleViewController: BaseViewController, FeedModuleViewInput {
     }
     
     func removeItems(with paths: [IndexPath]) {
+        return
         self.didStartCollectionViewAnimation()
         collectionView.performBatchUpdates({
             self.collectionView.deleteItems(at: paths)
@@ -374,10 +379,42 @@ class FeedModuleViewController: BaseViewController, FeedModuleViewInput {
     }
     
     func reload() {
-        self.collectionView.reloadData()
+//        self.collectionView.reloadData()
+    }
+
+    func performBatches(updates: [BMACollectionUpdate]?, withSections: [BMAUpdatableCollectionSection]) {
+        self.collectionView.bma_performBatchUpdates(updates, applyChangesToModelBlock: {
+            
+            guard let section = withSections.first as? BatchCollection, let batchItems = section.items as? [BatchCollectionItem] else {
+                fatalError()
+            }
+            
+            self.output.currentItems = batchItems.map { $0.post }
+        }, reloadCellBlock: { (cell, path) in
+            
+            guard let cell = cell as? PostCellProtocol else {
+                fatalError("Wrong cell")
+            }
+            
+            let item = self.output.item(for: path)
+            cell.configure(with: item, collectionView: self.collectionView)
+            
+        }) { (completed) in
+            
+        }
     }
     
+//    - (void)performBatchUpdates:(NSArray *)updates forSections:(NSArray *)sections {
+//    [self.collectionView bma_performBatchUpdates:updates applyChangesToModelBlock:^{
+//    self.primitiveSections = sections;
+//    } reloadCellBlock:^(UICollectionViewCell *cell, NSIndexPath *indexPath) {
+//    [self reloadCell:cell atIndexPath:indexPath];
+//    } completionBlock:nil];
+//    }
+    
+    
     func reload(with index: Int) {
+        return
         collectionView.reloadItems(at: [IndexPath(item: index, section: 0)])
     }
     

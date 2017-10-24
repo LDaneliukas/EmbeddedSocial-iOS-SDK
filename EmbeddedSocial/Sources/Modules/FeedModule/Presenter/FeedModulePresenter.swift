@@ -177,6 +177,7 @@ class FeedModulePresenter: FeedModuleInput, FeedModuleViewOutput, FeedModuleInte
     fileprivate var cursor: String? = nil
     fileprivate let limit: Int32 = Int32(Constants.Feed.pageSize)
     fileprivate var items = [Post]()
+    var currentItems: [Post] = [Post]()
     fileprivate var fetchRequestsInProgress: Set<String> = Set()
     fileprivate var header: SupplementaryItemModel?
     
@@ -317,7 +318,7 @@ class FeedModulePresenter: FeedModuleInput, FeedModuleViewOutput, FeedModuleInte
     func item(for path: IndexPath) -> PostViewModel {
         
         let index = path.row
-        let item = items[index]
+        let item = currentItems[index]
         
         let onAction: PostViewModel.ActionHandler = { [weak self] action, path in
             self?.handle(action: action, path: path)
@@ -452,7 +453,7 @@ class FeedModulePresenter: FeedModuleInput, FeedModuleViewOutput, FeedModuleInte
     }
     
     func numberOfItems() -> Int {
-        return items.count
+        return currentItems.count
     }
     
     func viewIsReady() {
@@ -486,6 +487,7 @@ class FeedModulePresenter: FeedModuleInput, FeedModuleViewOutput, FeedModuleInte
         handle(action: .postDetailed, path: path)
     }
     
+    
     // MARK: FeedModuleInteractorOutput
     
     private func processFetchResult(feed: Feed, isMore: Bool) {
@@ -504,7 +506,7 @@ class FeedModulePresenter: FeedModuleInput, FeedModuleViewOutput, FeedModuleInte
         
         
         
-        let oldItems = self.items.map { BatchCollectionItem(post: $0) }
+        let oldItems = self.currentItems.map { BatchCollectionItem(post: $0) }
         let oldSection = BatchCollection(uid: "0", items: oldItems)
         
         let newItems = feed.items.map { BatchCollectionItem(post: $0) }
@@ -517,41 +519,12 @@ class FeedModulePresenter: FeedModuleInput, FeedModuleViewOutput, FeedModuleInte
                                                 
                                                 Logger.log(updates, event: .development)
                                                 
-        }
-        
-        
-        let cachedNumberOfItems = items.count
-        
-        if isMore {
-            appendWithReplacing(original: &items, appending: feed.items)
-        } else {
-            items = feed.items
+                                                self.view.performBatches(updates: updates, withSections: sections)
+                                                
         }
         
         cursor = feed.cursor
         
-        // show changes on UI
-        let shouldAddItems = items.count - cachedNumberOfItems
-        let shouldRemoveItems = cachedNumberOfItems - items.count
-        
-        // insert/remove items
-        if cachedNumberOfItems == 0 {
-            view.reload()
-        }
-        else {
-            
-            if shouldAddItems > 0 {
-                let paths = Array(cachedNumberOfItems..<items.count).map { IndexPath(row: $0, section: 0) }
-                view.insertNewItems(with: paths)
-            }
-            else if shouldRemoveItems > 0 {
-                let paths = Array(items.count..<cachedNumberOfItems).map { IndexPath(row: $0, section: 0) }
-                view.removeItems(with: paths)
-            }
-            
-            // update data for rest of cells
-            view.reloadVisible()
-        }
     }
     
     func didFetch(feed: Feed) {
