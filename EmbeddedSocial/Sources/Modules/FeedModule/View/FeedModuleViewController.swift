@@ -11,11 +11,7 @@ protocol FeedModuleViewInput: class {
     func setupInitialState(showGalleryView: Bool)
     func setLayout(type: FeedModuleLayoutType)
     func resetFocus()
-    func reload()
-    func reload(with index: Int)
-    func reloadVisible()
-    func insertNewItems(with paths: [IndexPath])
-    func removeItems(with paths: [IndexPath])
+    
     // Turns off "pull to refresh"
     func setRefreshing(state: Bool)
     // Turns on/off loading indicator
@@ -347,41 +343,6 @@ class FeedModuleViewController: BaseViewController, FeedModuleViewInput {
         }
     }
     
-    func reloadVisible() {
-        return
-        let paths = collectionView.indexPathsForVisibleItems
-        self.didStartCollectionViewAnimation()
-        collectionView.performBatchUpdates({ 
-            self.collectionView.reloadItems(at: paths)
-        }) { (finished) in
-            self.didFinishCollectionViewAnimation()
-        }
-    }
-    
-    func insertNewItems(with paths:[IndexPath]) {
-        return
-        self.didStartCollectionViewAnimation()
-        collectionView.performBatchUpdates({
-            self.collectionView.insertItems(at: paths)
-        }) { (finished) in
-            self.didFinishCollectionViewAnimation()
-        }
-    }
-    
-    func removeItems(with paths: [IndexPath]) {
-        return
-        self.didStartCollectionViewAnimation()
-        collectionView.performBatchUpdates({
-            self.collectionView.deleteItems(at: paths)
-        }) { (finished) in
-            self.didFinishCollectionViewAnimation()
-        }
-    }
-    
-    func reload() {
-//        self.collectionView.reloadData()
-    }
-
     func performBatches(updates: [BMACollectionUpdate]?, withSections: [BMAUpdatableCollectionSection]) {
         self.collectionView.bma_performBatchUpdates(updates, applyChangesToModelBlock: {
             
@@ -402,20 +363,6 @@ class FeedModuleViewController: BaseViewController, FeedModuleViewInput {
         }) { (completed) in
             
         }
-    }
-    
-//    - (void)performBatchUpdates:(NSArray *)updates forSections:(NSArray *)sections {
-//    [self.collectionView bma_performBatchUpdates:updates applyChangesToModelBlock:^{
-//    self.primitiveSections = sections;
-//    } reloadCellBlock:^(UICollectionViewCell *cell, NSIndexPath *indexPath) {
-//    [self reloadCell:cell atIndexPath:indexPath];
-//    } completionBlock:nil];
-//    }
-    
-    
-    func reload(with index: Int) {
-        return
-        collectionView.reloadItems(at: [IndexPath(item: index, section: 0)])
     }
     
     func registerHeader<T: UICollectionReusableView>(withType type: T.Type, configurator: @escaping (T) -> Void) {

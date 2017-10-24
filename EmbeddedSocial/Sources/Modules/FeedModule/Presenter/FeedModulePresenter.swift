@@ -497,7 +497,10 @@ class FeedModulePresenter: FeedModuleInput, FeedModuleViewOutput, FeedModuleInte
         
         cursor = feed.cursor
         
-        updateUI(with: feed.items)
+        let initialItems: [Post] = isMore ? currentItems : []
+        let newItems = initialItems + feed.items
+        
+        updateUI(with: newItems)
     }
     
     func updateUI(with newItems: [Post]) {
@@ -531,7 +534,6 @@ class FeedModulePresenter: FeedModuleInput, FeedModuleViewOutput, FeedModuleInte
     }
     
     func didPostAction(post: PostHandle, action: PostSocialAction, error: Error?) {
-        view.reload()
         Logger.log(action, post, error)
     }
     
