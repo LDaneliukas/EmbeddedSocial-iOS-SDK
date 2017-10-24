@@ -296,7 +296,7 @@ class FeedModulePresenter: FeedModuleInput, FeedModuleViewOutput, FeedModuleInte
     
     fileprivate func fetchAllItems() {
         cursor = nil
-        updateUI(with: [])
+//        updateUI(with: [])
         fetchRequestsInProgress = Set()
         fetchItems()
     }
