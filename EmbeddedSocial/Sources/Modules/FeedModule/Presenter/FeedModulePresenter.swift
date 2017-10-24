@@ -671,11 +671,11 @@ extension FeedModulePresenter: PostMenuModuleOutput {
     }
     
     func didEdit(post: PostHandle) {
-        didChangeItem(post: post)
+        refreshData()
     }
     
     func didRemove(post: PostHandle) {
-        didRemoveItem(post: post)
+        refreshData()
         moduleOutput?.postRemoved()
     }
     
@@ -690,26 +690,14 @@ extension FeedModulePresenter: PostMenuModuleOutput {
     }
     
     // MARK: Private
-    
-    private func didChangeItem(user: UserHandle) {
-        if let index = items.index(where: { $0.userHandle == user }) {
-            view.reload(with: index)
-        }
-    }
-    
-    private func didChangeItem(post: PostHandle) {
-        if let index = items.index(where: { $0.topicHandle == post }) {
-            view.reload(with: index)
-        }
-    }
-    
     private func didRemoveItem(post: PostHandle) {
         if let index = items.index(where: { $0.topicHandle == post }) {
+            Logger.log(index)
             items.remove(at: index)
             view.removeItems(with: [IndexPath(row: index, section: 0)])
         }
     }
-    
+   
     private func didFail(_ error: Error) {
         view.showError(error: error)
     }
