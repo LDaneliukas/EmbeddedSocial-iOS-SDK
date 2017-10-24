@@ -169,14 +169,13 @@ class FeedModulePresenter: FeedModuleInput, FeedModuleViewOutput, FeedModuleInte
     }
     
     var isEmpty: Bool {
-        return items.isEmpty
+        return currentItems.isEmpty
     }
     
     fileprivate var isViewReady = false
     fileprivate var formatter = DateFormatterTool()
     fileprivate var cursor: String? = nil
     fileprivate let limit: Int32 = Int32(Constants.Feed.pageSize)
-    fileprivate var items = [Post]()
     var currentItems: [Post] = [Post]()
     fileprivate var fetchRequestsInProgress: Set<String> = Set()
     fileprivate var header: SupplementaryItemModel?
@@ -276,7 +275,7 @@ class FeedModulePresenter: FeedModuleInput, FeedModuleViewOutput, FeedModuleInte
     
     fileprivate func checkIfNoContent() {
         if shouldShowNoContent() {
-            view.needShowNoContent(state: items.count == 0)
+            view.needShowNoContent(state: currentItems.count == 0)
         }
     }
     
@@ -297,8 +296,7 @@ class FeedModulePresenter: FeedModuleInput, FeedModuleViewOutput, FeedModuleInte
     
     fileprivate func fetchAllItems() {
         cursor = nil
-        items = []
-        view.reload()
+        updateUI(with: [])
         fetchRequestsInProgress = Set()
         fetchItems()
     }
@@ -366,8 +364,8 @@ class FeedModulePresenter: FeedModuleInput, FeedModuleViewOutput, FeedModuleInte
         }
         
         let index = path.row
-        let userHandle = items[index].userHandle
-        let post = items[index]
+        let userHandle = currentItems[index].userHandle
+        let post = currentItems[index]
         
         switch action {
             
@@ -396,30 +394,30 @@ class FeedModulePresenter: FeedModuleInput, FeedModuleViewOutput, FeedModuleInte
             }
         case .like:
             
-            let status = items[index].liked
+            var newItems = currentItems
+            let status = newItems[index].liked
             let action: PostSocialAction = status ? .unlike : .like
             
-            items[index].liked = !status
-            
-            // change item locally
-            // TODO: remove this, since it's responsibility of outgoing cache 
+            newItems[index].liked = !status
+ 
             if action == .like {
-                items[index].totalLikes += 1
-            } else if action == .unlike && items[index].totalLikes > 0 {
-                items[index].totalLikes -= 1
+                newItems[index].totalLikes += 1
+            } else if action == .unlike && newItems[index].totalLikes > 0 {
+                newItems[index].totalLikes -= 1
             }
             
-            view.reload(with: index)
-            interactor.postAction(post: items[index], action: action)
+            updateUI(with: newItems)
+            interactor.postAction(post: currentItems[index], action: action)
             
         case .pin:
-            let status = items[index].pinned
+            var newItems = currentItems
+            let status = newItems[index].pinned
             let action: PostSocialAction = status ? .unpin : .pin
             
-            items[index].pinned = !status
+            newItems[index].pinned = !status
             
-            view.reload(with: index)
-            interactor.postAction(post: items[index], action: action)
+            updateUI(with: newItems)
+            interactor.postAction(post: currentItems[index], action: action)
             
         case .profile:
             guard moduleOutput?.shouldOpenProfile(for: userHandle) ?? true else { return }
@@ -433,7 +431,7 @@ class FeedModulePresenter: FeedModuleInput, FeedModuleViewOutput, FeedModuleInte
             }
             
         case .photo:
-            guard let imageUrl = items[path.row].imageUrl else {
+            guard let imageUrl = currentItems[path.row].imageUrl else {
                 return
             }
             
@@ -486,8 +484,7 @@ class FeedModulePresenter: FeedModuleInput, FeedModuleViewOutput, FeedModuleInte
     func didTapItem(path: IndexPath) {
         handle(action: .postDetailed, path: path)
     }
-    
-    
+
     // MARK: FeedModuleInteractorOutput
     
     private func processFetchResult(feed: Feed, isMore: Bool) {
@@ -496,20 +493,18 @@ class FeedModulePresenter: FeedModuleInput, FeedModuleViewOutput, FeedModuleInte
             return
         }
         
-        defer {
-            checkIfNoContent()
-        }
-    
         Logger.log("items arrived", event: .veryImportant)
         
-        //BMAExampleItemsSection *section = [[BMAExampleItemsSection alloc] initWithId:sectionId items:items];
+        cursor = feed.cursor
         
-        
-        
+        updateUI(with: feed.items)
+    }
+    
+    func updateUI(with newItems: [Post]) {
         let oldItems = self.currentItems.map { BatchCollectionItem(post: $0) }
         let oldSection = BatchCollection(uid: "0", items: oldItems)
         
-        let newItems = feed.items.map { BatchCollectionItem(post: $0) }
+        let newItems = newItems.map { BatchCollectionItem(post: $0) }
         let newSection = BatchCollection(uid: "0", items: newItems)
         
         BMACollectionUpdate.calculateUpdates(forOldModel: [oldSection],
@@ -520,11 +515,7 @@ class FeedModulePresenter: FeedModuleInput, FeedModuleViewOutput, FeedModuleInte
                                                 Logger.log(updates, event: .development)
                                                 
                                                 self.view.performBatches(updates: updates, withSections: sections)
-                                                
         }
-        
-        cursor = feed.cursor
-        
     }
     
     func didFetch(feed: Feed) {
@@ -631,13 +622,14 @@ extension FeedModulePresenter: PostMenuModuleOutput {
         } else {
             
             // Update following status for current posts
-            for (index, item) in items.enumerated() {
+            var newItems = currentItems
+            for (index, item) in newItems.enumerated() {
                 if item.userHandle == user.uid {
-                    items[index].userStatus = .accepted
+                    newItems[index].userStatus = .accepted
                 }
             }
             
-            view.reloadVisible()
+            updateUI(with: newItems)
         }
     }
     
@@ -651,13 +643,14 @@ extension FeedModulePresenter: PostMenuModuleOutput {
         } else {
             
             // Update following status for current posts
-            for (index, item) in items.enumerated() {
+            var newItems = currentItems
+            for (index, item) in newItems.enumerated() {
                 if item.userHandle == user.uid && item.userStatus == .accepted {
-                    items[index].userStatus = .empty
+                    newItems[index].userStatus = .empty
                 }
             }
             
-            view.reloadVisible()
+            updateUI(with: newItems)
         }
     }
     
@@ -687,21 +680,18 @@ extension FeedModulePresenter: PostMenuModuleOutput {
     // MARK: Private
     
     private func didChangeItem(user: UserHandle) {
-        if let index = items.index(where: { $0.userHandle == user }) {
-            view.reload(with: index)
-        }
+        // TODO: need check offline mode
     }
     
     private func didChangeItem(post: PostHandle) {
-        if let index = items.index(where: { $0.topicHandle == post }) {
-            view.reload(with: index)
-        }
+        // TODO: need check offline mode
     }
     
     private func didRemoveItem(post: PostHandle) {
-        if let index = items.index(where: { $0.topicHandle == post }) {
-            items.remove(at: index)
-            view.removeItems(with: [IndexPath(row: index, section: 0)])
+        var newItems = currentItems
+        if let index = newItems.index(where: { $0.topicHandle == post }) {
+            newItems.remove(at: index)
+            updateUI(with: newItems)
         }
     }
     
