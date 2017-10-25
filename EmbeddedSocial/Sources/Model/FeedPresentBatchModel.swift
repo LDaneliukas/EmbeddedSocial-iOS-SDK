@@ -11,10 +11,14 @@ class BatchCollection: NSObject, BMAUpdatableCollectionSection {
     var items: [BMAUpdatableCollectionItem]
     var uid: String
     
-    init(uid: String, items: [BMAUpdatableCollectionItem]) {
+    init(uid: NSString, items: [BMAUpdatableCollectionItem]) {
         self.items = items
-        self.uid = uid
-    }   
+        self.uid = uid as String
+    }
+    
+    override var description: String {
+        return "\(uid) \(items)"
+    }
 }
 
 class BatchCollectionItem: NSObject, BMAUpdatableCollectionItem {
@@ -37,6 +41,10 @@ class BatchCollectionItem: NSObject, BMAUpdatableCollectionItem {
     
     override var hash: Int {
         return post.hashValue
+    }
+    
+    override var description: String {
+        return "\(uid)"
     }
     
 }

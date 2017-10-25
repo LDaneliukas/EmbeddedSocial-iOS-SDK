@@ -33,10 +33,6 @@ class FeedModuleViewController: BaseViewController, FeedModuleViewInput {
     
     var output: FeedModuleViewOutput!
     
-    var numberOfItems: Int {
-        return collectionView?.numberOfItems(inSection: 0) ?? 0
-    }
-    
     var paddingEnabled: Bool = false {
         didSet {
             refreshLayout()
@@ -86,7 +82,7 @@ class FeedModuleViewController: BaseViewController, FeedModuleViewInput {
         collectionViewAnimations -= 1
     }
     
-    @IBOutlet weak var collectionView: UICollectionView!
+    @IBOutlet fileprivate weak var collectionView: UICollectionView!
     
     lazy var bottomRefreshControl: UIActivityIndicatorView = {
         let activity = UIActivityIndicatorView(activityIndicatorStyle: .gray)
@@ -343,26 +339,51 @@ class FeedModuleViewController: BaseViewController, FeedModuleViewInput {
         }
     }
     
-    func performBatches(updates: [BMACollectionUpdate]?, withSections: [BMAUpdatableCollectionSection]) {
-        self.collectionView.bma_performBatchUpdates(updates, applyChangesToModelBlock: {
-            
-            guard let section = withSections.first as? BatchCollection, let batchItems = section.items as? [BatchCollectionItem] else {
-                fatalError()
-            }
-            
-            self.output.currentItems = batchItems.map { $0.post }
-        }, reloadCellBlock: { (cell, path) in
-            
-            guard let cell = cell as? PostCellProtocol else {
-                fatalError("Wrong cell")
-            }
-            
-            let item = self.output.item(for: path)
-            cell.configure(with: item, collectionView: self.collectionView)
-            
-        }) { (completed) in
-            
+    var operations: [BlockOperation] = []
+    var isAnimating = false {
+        didSet {
+            Logger.log(isAnimating, event: .development)
+            handleOperations()
         }
+    }
+    
+    func handleOperations() {
+        if let op = operations.first, isAnimating == false {
+            operations.removeFirst()
+            OperationQueue.main.addOperation(op)
+        }
+    }
+    
+    func performBatches(updates: [BMACollectionUpdate]?, withSections: [BMAUpdatableCollectionSection]) {
+        
+        let block = BlockOperation {
+            
+            self.isAnimating = true
+            self.collectionView.bma_performBatchUpdates(updates, 
+                                                        applyChangesToModelBlock: {
+                
+                guard let section = withSections.first as? BatchCollection, let batchItems = section.items as? [BatchCollectionItem] else {
+                    fatalError()
+                }
+                
+                self.output.currentItems = batchItems.map { $0.post }
+            }, reloadCellBlock: { (cell, path) in
+                
+                guard let cell = cell as? PostCellProtocol else {
+                    fatalError("Wrong cell")
+                }
+                
+                let item = self.output.item(for: path)
+                cell.configure(with: item, collectionView: self.collectionView)
+                
+            }) { (completed) in
+                
+                self.isAnimating = false
+            }
+        }
+        
+        operations.append(block)
+        handleOperations()
     }
     
     func registerHeader<T: UICollectionReusableView>(withType type: T.Type, configurator: @escaping (T) -> Void) {
@@ -374,8 +395,8 @@ class FeedModuleViewController: BaseViewController, FeedModuleViewInput {
     
     deinit {
         Logger.log()
-        self.collectionView?.delegate = nil
-        self.collectionView?.dataSource = nil
+        self.collectionView.delegate = nil
+        self.collectionView.dataSource = nil
     }
 }
 
@@ -418,21 +439,6 @@ extension FeedModuleViewController: UICollectionViewDelegate, UICollectionViewDa
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         output.didTapItem(path: indexPath)
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
-        
-        return CGSize(width: containerWidth(), height: output.headerSize.height)
-    }
-    
-    func collectionView(_ collectionView: UICollectionView,
-                        layout collectionViewLayout: UICollectionViewLayout,
-                        referenceSizeForFooterInSection section: Int) -> CGSize {
-        if collectionView.numberOfItems(inSection: 0) > 1 {
-            return CGSize(width: collectionView.frame.size.width, height: Constants.FeedModule.Collection.footerHeight)
-        } else {
-            return CGSize.zero
-        }
     }
     
     func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {

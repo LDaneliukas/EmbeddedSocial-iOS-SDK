@@ -249,7 +249,7 @@ class PostMenuModulePresenter: PostMenuModuleViewOutput, PostMenuModuleInput, Po
     
     func didTapRemovePost(post: PostHandle) {
         self.output?.didRemove(post: post)
-        self.interactor.remove(post: post)
+        //self.interactor.remove(post: post)
     }
     
     func didTapRemove(comment: Comment) {

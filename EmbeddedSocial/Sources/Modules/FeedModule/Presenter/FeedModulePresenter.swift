@@ -176,7 +176,11 @@ class FeedModulePresenter: FeedModuleInput, FeedModuleViewOutput, FeedModuleInte
     fileprivate var formatter = DateFormatterTool()
     fileprivate var cursor: String? = nil
     fileprivate let limit: Int32 = Int32(Constants.Feed.pageSize)
-    var currentItems: [Post] = [Post]()
+    var currentItems: [Post] = [Post]() {
+        didSet {
+            Logger.log("\(oldValue.count) -> \(currentItems.count)", event: .development)
+        }
+    }
     fileprivate var fetchRequestsInProgress: Set<String> = Set()
     fileprivate var header: SupplementaryItemModel?
     
@@ -515,9 +519,9 @@ class FeedModulePresenter: FeedModuleInput, FeedModuleViewOutput, FeedModuleInte
                                              sectionsPriorityOrder: nil,
                                              eliminatesDuplicates: true) { (sections, updates) in
                                                 
-                                                Logger.log(updates, event: .development)
-                                                
+                                                Logger.log(sections.first?.items, updates, event: .development)
                                                 self.view.performBatches(updates: updates, withSections: sections)
+                                                
         }
     }
     
