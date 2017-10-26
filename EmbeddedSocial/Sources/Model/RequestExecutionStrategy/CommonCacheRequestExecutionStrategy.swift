@@ -13,9 +13,9 @@ CacheRequestExecutionStrategy<ResponseType, ResultType> where ResponseType: Cach
     override func execute(with builder: RequestBuilder<ResponseType>, completion: @escaping (Result<ResultType>) -> Void) {
         let cachedResponse = cache?.firstIncoming(ofType: ResponseType.self, handle: builder.URLString)
         if cachedResponse != nil {
-//            DispatchQueue.main.async {
-//                self.processResponse(cachedResponse!, isFromCache: true, error: nil, completion: completion)
-//            }
+            DispatchQueue.main.async {
+                self.processResponse(cachedResponse!, isFromCache: true, error: nil, completion: completion)
+            }
         }
         
         if let networkTracker = networkTracker, !networkTracker.isReachable {
