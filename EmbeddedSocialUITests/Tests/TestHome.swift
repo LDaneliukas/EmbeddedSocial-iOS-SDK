@@ -184,7 +184,6 @@ class TestOnlineHome: BaseTestHome, OnlineTest {
                             "user->lastName": "Doe",
                             "totalLikes": 5,
                             "totalComments": 7,
-                            "text": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
                             "liked": true,
                             "pinned": true]
         

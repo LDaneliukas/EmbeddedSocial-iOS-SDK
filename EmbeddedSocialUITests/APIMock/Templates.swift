@@ -49,7 +49,7 @@ class Templates {
         
         for i in cursor...cursor + limit - 1 {
             var values = ["title": interval + String(i),
-                          "topicHandle": interval + String(i),
+                        
                           "lastUpdatedTime": Date().ISOString,
                           "createdTime": Date().ISOString,
                           "blobType": APIConfig.showTopicImages ? "Image": "Unknown",
@@ -57,15 +57,18 @@ class Templates {
                           "blobUrl": APIConfig.showTopicImages ? String(format: "http://localhost:8080/images/%@", UUID().uuidString) : NSNull()] as [String: Any]
             
             if APIConfig.numberedTopicTeasers {
-                values["text"] = "topic text" + String(i)
+               // values["text"] = "topic text" + String(i)
             }
             
             if APIConfig.loadMyTopics {
                 values["user->userHandle"] = "me"
             }
             
-            let topic = Templates.load(name: "topic",
+            var topic = Templates.load(name: "topic",
                                        values: values)
+            
+            topic.removeValue(forKey: "text")
+            
             topics.append(topic)
         }
         
