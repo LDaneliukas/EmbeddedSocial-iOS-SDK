@@ -19,6 +19,7 @@ struct ThirdPartyConfigurator: ThirdPartyConfiguratorType {
         setupTwitter()
         setupFacebook(application: application, launchOptions: launchOptions)
         setupGoogle()
+        setupHockeyApp()
     }
     
     private func setupTwitter() {
