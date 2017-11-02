@@ -29,7 +29,6 @@ struct PostViewModel {
     let postImageUrl: String?
     let postImageHandle: String?
     let isTrimmed: Bool
-    let cellType: String
     
     // sourcery: skipEquality
     let onAction: ActionHandler?
@@ -40,7 +39,6 @@ struct PostViewModel {
   
     init(with post: Post,
          isTrimmed: Bool = false,
-         cellType: String,
          actionHandler: ActionHandler? = nil) {
         
         let formatter = DateFormatterTool.shared
@@ -87,8 +85,6 @@ struct PostViewModel {
         
         isLiked = post.liked
         isPinned = post.pinned
-        
-        self.cellType = cellType
         onAction = actionHandler
     }
     

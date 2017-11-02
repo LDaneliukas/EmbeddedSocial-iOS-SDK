@@ -86,7 +86,6 @@ internal func == (lhs: PostViewModel, rhs: PostViewModel) -> Bool {
     guard compareOptionals(lhs: lhs.postImageUrl, rhs: rhs.postImageUrl, compare: ==) else { return false }
     guard compareOptionals(lhs: lhs.postImageHandle, rhs: rhs.postImageHandle, compare: ==) else { return false }
     guard lhs.isTrimmed == rhs.isTrimmed else { return false }
-    guard lhs.cellType == rhs.cellType else { return false }
     return true
 }
 // MARK: - SocialUser AutoEquatable

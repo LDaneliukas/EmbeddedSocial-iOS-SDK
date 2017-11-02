@@ -74,34 +74,50 @@ class FeedModuleViewController: BaseViewController, FeedModuleViewInput {
         }
     }
     
-    fileprivate func canChangeLayout() -> Bool {
-        return collectionViewAnimations == 0
+    struct LayoutState {
+        var currentLayout: FeedModuleLayoutType = .list
+        var nextLayout: FeedModuleLayoutType? = nil
+        
+        private var collectionViewAnimations: Int = 0
+        
+        mutating func increaseAnimationsCounter() {
+            collectionViewAnimations += 1
+        }
+        
+        mutating func decreaseAnimationsCounter() {
+            collectionViewAnimations -= 1
+        }
+        
+        var canChangeLayout: Bool {
+            get {
+                return collectionViewAnimations == 0
+            }
+        }
+        
+        var shouldChangeLayout: Bool {
+            return nextLayout != nil && canChangeLayout == true
+        }
+        
     }
     
-    fileprivate var collectionViewAnimations = 0 {
-        didSet {
-            assert(collectionViewAnimations >= 0)
-            checkNeedsLayoutChange()
+    fileprivate var layoutState: LayoutState = LayoutState() {
+        willSet {
+            assert(Thread.isMainThread)
         }
     }
     
-    fileprivate var pendingLayout: FeedModuleLayoutType?
     fileprivate func checkNeedsLayoutChange() {
-        
-        guard let layout = pendingLayout, canChangeLayout() == true else {
-            return
+        if layoutState.shouldChangeLayout {
+            updateLayout(with: &layoutState)
         }
-        
-        onUpdateLayout(type: layout)
-        pendingLayout = nil
     }
     
     fileprivate func didStartCollectionViewAnimation() {
-        collectionViewAnimations += 1
+        layoutState.increaseAnimationsCounter()
     }
     
     fileprivate func didFinishCollectionViewAnimation() {
-        collectionViewAnimations -= 1
+        layoutState.decreaseAnimationsCounter()
     }
     
     @IBOutlet weak var collectionView: UICollectionView!
@@ -113,14 +129,14 @@ class FeedModuleViewController: BaseViewController, FeedModuleViewInput {
         return activity
     }()
     
-    lazy var noContentLabel: UILabel = { [unowned self] in
+    lazy var noContentLabel: UILabel = {
         let view = UILabel()
         view.text = L10n.Common.noContent
         view.sizeToFit()
         view.isHidden = true
         
         return view
-        }()
+    }()
     
     var statusBarActivityControl: StatusBarActivityControlProtocol! = StatusBarActivityControl()
     
@@ -209,13 +225,15 @@ class FeedModuleViewController: BaseViewController, FeedModuleViewInput {
         output.didAskFetchAll()
     }
     
-    private func onUpdateLayout(type: FeedModuleLayoutType, animated: Bool = false) {
-        
-        collectionView.reloadData()
-        collectionView.collectionViewLayout.invalidateLayout()
+    private func updateLayout(with state: inout LayoutState) {
     
-        // switch layout
-        switch type {
+//        collectionView.collectionViewLayout.invalidateLayout()
+        
+        
+        let layout = state.nextLayout!
+        let animated = false
+    
+        switch layout {
         case .grid:
             layoutChangeButton.image = UIImage(asset: .iconList)
             if collectionView.collectionViewLayout != gridLayout {
@@ -227,6 +245,11 @@ class FeedModuleViewController: BaseViewController, FeedModuleViewInput {
                 collectionView.setCollectionViewLayout(listLayout, animated: animated)
             }
         }
+        
+        collectionView.reloadData()
+        
+        state.nextLayout = nil
+        state.currentLayout = layout
     }
     
     private func onUpdateBounds() {
@@ -263,30 +286,6 @@ class FeedModuleViewController: BaseViewController, FeedModuleViewInput {
         layout.minimumLineSpacing = Constants.FeedModule.Collection.rowsMargin
         layout.sectionInset = UIEdgeInsets(top: padding , left: padding , bottom: padding , right: padding )
         layout.itemSize = CGSize(width: containerWidth, height: CGFloat(0))
-    }
-    
-    private func numberOfItemsInList(_ layout: UICollectionViewFlowLayout, in rect: CGRect) -> Int {
-        
-        let item = PostViewModel(with: Post.mock(seed: 0),
-                                 cellType: FeedModuleLayoutType.list.cellType,
-                                 actionHandler: nil)
-        var size = calculateCellSizeWith(viewModel: item)
-        
-        size.height += layout.minimumLineSpacing
-        
-        var result = rect.height / size.height
-        result.round(.up)
-        
-        return Int(result)
-    }
-    
-    private func numberOfItemsInGrid(_ layout: UICollectionViewFlowLayout, in rect: CGRect) -> Int {
-        
-        let itemHeight = layout.itemSize.height + layout.minimumLineSpacing
-        let rows = (rect.size.height / itemHeight).rounded(.up)
-        let result = rows * Constants.FeedModule.Collection.itemsPerRow
-        
-        return Int(result)
     }
     
     fileprivate func calculateCellSizeWith(viewModel: PostViewModel) -> CGSize {
@@ -349,7 +348,7 @@ class FeedModuleViewController: BaseViewController, FeedModuleViewInput {
     }
 
     func setLayout(type: FeedModuleLayoutType) {
-        pendingLayout = type
+        layoutState.nextLayout = type
         checkNeedsLayoutChange()
     }
     
@@ -426,8 +425,9 @@ extension FeedModuleViewController: UICollectionViewDelegate, UICollectionViewDa
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         
         let item = output.item(for: indexPath)
+        let cellType = layoutState.currentLayout.cellType
         
-        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: item.cellType, for: indexPath) as? PostCellProtocol else {
+        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: cellType, for: indexPath) as? PostCellProtocol else {
             fatalError("Wrong cell")
         }
         
