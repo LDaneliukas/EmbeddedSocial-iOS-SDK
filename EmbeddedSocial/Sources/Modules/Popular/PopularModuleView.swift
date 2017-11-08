@@ -62,7 +62,7 @@ class PopularModuleView: UIViewController {
         }
     }
     
-    @objc private func didTapChangeLayout() {
+    @objc fileprivate func didTapChangeLayout() {
         output.feedLayoutTypeChangeDidTap()
     }
     
@@ -97,7 +97,15 @@ extension PopularModuleView: PopularModuleViewInput {
     }
     
     func setFeedLayoutImage(_ image: UIImage) {
-        layoutChangeButton.image = image
+
+        let button = UIBarButtonItem(
+            image: image,
+            style: .plain,
+            target: self,
+            action: #selector(self.didTapChangeLayout))
+        
+        navigationItem.rightBarButtonItem = button
+        
     }
     
     func embedFeedViewController(_ viewController: UIViewController) {

@@ -44,7 +44,7 @@ class PostCell: UICollectionViewCell, PostCellProtocol {
         }
         
         let ratio = Constants.FeedModule.Collection.imageRatio
-        let result = height * ratio
+        let result = floor(height * ratio)
         
         return max(result, Constants.FeedModule.Collection.imageHeight)
     }
@@ -152,9 +152,12 @@ class PostCell: UICollectionViewCell, PostCellProtocol {
         
         postImageHeight.constant = getImageHeight(containerHeight: containerHeight)
         
+        
         if !imageIsAvailable {
             postImageHeight.constant = 0
         }
+        
+        postImage.isHidden = postImageHeight.constant == 0
         
         postImage.setPhotoWithCaching(data.postPhoto, placeholder: postImagePlaceholder)
         

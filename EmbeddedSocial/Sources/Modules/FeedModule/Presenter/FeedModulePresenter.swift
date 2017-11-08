@@ -134,7 +134,7 @@ enum FeedModuleLayoutType: Int {
         case .list:
             return .iconGallery
         case .grid:
-            return .iconList
+            return .iconReject
         }
     }
     

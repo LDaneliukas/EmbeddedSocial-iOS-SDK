@@ -211,22 +211,23 @@ class FeedModuleViewController: BaseViewController, FeedModuleViewInput {
     
     private func onUpdateLayout(type: FeedModuleLayoutType, animated: Bool = false) {
         
-        collectionView.reloadData()
         collectionView.collectionViewLayout.invalidateLayout()
     
         // switch layout
         switch type {
         case .grid:
-            layoutChangeButton.image = UIImage(asset: .iconList)
+            layoutChangeButton.image = UIImage(asset: .iconGear)
             if collectionView.collectionViewLayout != gridLayout {
                 collectionView.setCollectionViewLayout(gridLayout, animated: animated)
             }
         case .list:
-            layoutChangeButton.image = UIImage(asset: .iconGallery)
+            layoutChangeButton.image = UIImage(asset: .iconReject)
             if collectionView.collectionViewLayout != listLayout {
                 collectionView.setCollectionViewLayout(listLayout, animated: animated)
             }
         }
+        
+        collectionView.reloadData()
     }
     
     private func onUpdateBounds() {

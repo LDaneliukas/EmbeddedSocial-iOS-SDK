@@ -80,6 +80,19 @@
                                 <constraint firstItem="cAQ-A1-E3u" firstAttribute="centerY" secondItem="bYI-rM-xRs" secondAttribute="centerY" id="znb-tf-uqU"/>
                             </constraints>
                         </view>
+                        <imageView userInteractionEnabled="NO" contentMode="center" horizontalHuggingPriority="251" verticalCompressionResistancePriority="1" translatesAutoresizingMaskIntoConstraints="NO" id="yT6-qf-owZ" userLabel="Post Image">
+                            <rect key="frame" x="0.0" y="50" width="364" height="180"/>
+                            <constraints>
+                                <constraint firstAttribute="height" constant="180" id="x9G-KA-E2z"/>
+                            </constraints>
+                        </imageView>
+                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="3kI-kt-ADv" userLabel="Post Image Button">
+                            <rect key="frame" x="0.0" y="50" width="364" height="180"/>
+                            <accessibility key="accessibilityConfiguration" identifier="Post Image"/>
+                            <connections>
+                                <action selector="onTapPhoto:" destination="iN0-l3-epB" eventType="touchUpInside" id="B2r-fc-sOk"/>
+                            </connections>
+                        </button>
                         <view contentMode="scaleToFill" verticalCompressionResistancePriority="250" translatesAutoresizingMaskIntoConstraints="NO" id="iJH-I2-d58" userLabel="postcontent">
                             <rect key="frame" x="15" y="230" width="334" height="66"/>
                             <subviews>
@@ -213,22 +226,10 @@
                                 <constraint firstItem="LTY-SJ-7jo" firstAttribute="leading" secondItem="6te-RD-RH1" secondAttribute="trailing" constant="5" id="wcC-iB-S6i"/>
                             </constraints>
                         </view>
-                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="3kI-kt-ADv" userLabel="Post Image Button">
-                            <rect key="frame" x="0.0" y="50" width="364" height="180"/>
-                            <accessibility key="accessibilityConfiguration" identifier="Post Image"/>
-                            <connections>
-                                <action selector="onTapPhoto:" destination="iN0-l3-epB" eventType="touchUpInside" id="B2r-fc-sOk"/>
-                            </connections>
-                        </button>
-                        <imageView userInteractionEnabled="NO" contentMode="center" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="yT6-qf-owZ" userLabel="Post Image">
-                            <rect key="frame" x="0.0" y="50" width="364" height="180"/>
-                            <constraints>
-                                <constraint firstAttribute="height" constant="180" id="x9G-KA-E2z"/>
-                            </constraints>
-                        </imageView>
                     </subviews>
                     <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
                     <constraints>
+                        <constraint firstItem="iJH-I2-d58" firstAttribute="top" secondItem="yT6-qf-owZ" secondAttribute="bottom" priority="999" id="3sa-Mx-u08"/>
                         <constraint firstItem="yT6-qf-owZ" firstAttribute="leading" secondItem="OEZ-HU-KUq" secondAttribute="leading" id="7V1-N0-xex"/>
                         <constraint firstItem="Ugb-5x-70X" firstAttribute="top" secondItem="iJH-I2-d58" secondAttribute="bottom" id="BKX-Sv-a61"/>
                         <constraint firstItem="oqe-ch-5n3" firstAttribute="top" secondItem="OEZ-HU-KUq" secondAttribute="top" id="DCk-be-WSU"/>
@@ -244,7 +245,6 @@
                         <constraint firstAttribute="bottom" secondItem="Ugb-5x-70X" secondAttribute="bottom" id="qa8-yC-g9j"/>
                         <constraint firstAttribute="trailing" secondItem="yT6-qf-owZ" secondAttribute="trailing" id="s7H-LL-bMU"/>
                         <constraint firstAttribute="trailing" secondItem="Ugb-5x-70X" secondAttribute="trailing" id="soU-zi-fAV"/>
-                        <constraint firstItem="iJH-I2-d58" firstAttribute="top" secondItem="yT6-qf-owZ" secondAttribute="bottom" id="uJp-cT-u4e"/>
                         <constraint firstItem="iJH-I2-d58" firstAttribute="leading" secondItem="OEZ-HU-KUq" secondAttribute="leading" constant="15" id="zD3-kk-f6j"/>
                     </constraints>
                 </view>
