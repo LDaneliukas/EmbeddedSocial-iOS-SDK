@@ -9,7 +9,7 @@ protocol PostMenuModuleInteractorInput {
     func unblock(user: User)
     func follow(user: User)
     func unfollow(user: User)
-    func hide(post: PostHandle)
+    func hide(post: Post)
     func edit(post: PostHandle)
     func remove(post: PostHandle)
     func remove(comment: Comment)
@@ -87,9 +87,9 @@ class PostMenuModuleInteractor: PostMenuModuleInteractorInput {
         self.output.didEdit(post: post, error: nil)
     }
     
-    func hide(post: PostHandle) {
-        socialService.deletePostFromMyFollowing(postID: post) { [strongOutput = output!] (result) in
-            strongOutput.didHide(post: post, error: result.error)
+    func hide(post: Post) {
+        socialService.deletePostFromMyFollowing(post: post) { [strongOutput = output!] (result) in
+            strongOutput.didHide(post: post.topicHandle, error: result.error)
         }
     }
     

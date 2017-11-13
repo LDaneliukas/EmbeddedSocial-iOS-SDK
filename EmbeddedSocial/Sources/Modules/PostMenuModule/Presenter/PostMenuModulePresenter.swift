@@ -37,7 +37,7 @@ protocol PostMenuModuleInput: class {
     
     func didTapBlock(user: User)
     func didTapUnblock(user: User)
-    func didTapHide(post: PostHandle)
+    func didTapHide(post: Post)
     func didTapFollow(user: User)
     func didTapUnfollow(user: User)
     func didTapEditPost(post: Post)
@@ -203,7 +203,7 @@ class PostMenuModulePresenter: PostMenuModuleViewOutput, PostMenuModuleInput, Po
         var item = ActionViewModel()
         item.title = L10n.PostMenu.hide
         item.action = { [weak self] in
-            self?.didTapHide(post: post.topicHandle)
+            self?.didTapHide(post: post)
         }
         
         return item
@@ -224,8 +224,8 @@ class PostMenuModulePresenter: PostMenuModuleViewOutput, PostMenuModuleInput, Po
         self.interactor.unblock(user: user)
     }
     
-    func didTapHide(post: PostHandle) {
-        self.output?.didHide(post: post)
+    func didTapHide(post: Post) {
+        self.output?.didHide(post: post.topicHandle)
         self.interactor.hide(post: post)
     }
     

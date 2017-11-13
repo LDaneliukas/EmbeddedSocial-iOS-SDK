@@ -30,7 +30,7 @@ protocol SocialServiceType {
     
     func getUserFollowing(userID: String, cursor: String?, limit: Int, completion: @escaping (Result<UsersListResponse>) -> Void)
     
-    func deletePostFromMyFollowing(postID: String, completion: @escaping (Result<Void>) -> Void)
+    func deletePostFromMyFollowing(post: Post, completion: @escaping (Result<Void>) -> Void)
     
     func getMyBlockedUsers(cursor: String?, limit: Int, completion: @escaping (Result<UsersListResponse>) -> Void)
     
@@ -155,16 +155,10 @@ class SocialService: BaseService, SocialServiceType {
         usersFeedExecutor.execute(with: builder, completion: completion)
     }
     
-    func deletePostFromMyFollowing(postID: String, completion: @escaping (Result<Void>) -> Void) {
-        SocialAPI.myFollowingDeleteFollowingTopic(topicHandle: postID,
-                                                  authorization: authorization) { (object, errorResponse) in
-                                                    
-                                                    if let error = errorResponse {
-                                                        self.errorHandler.handle(error: error, completion: completion)
-                                                    } else {
-                                                        completion(.success())
-                                                    }
-        }
+    func deletePostFromMyFollowing(post: Post, completion: @escaping (Result<Void>) -> Void) {
+        let builder = SocialAPI.myFollowingDeleteFollowingTopicWithRequestBuilder(topicHandle: post.topicHandle, authorization: authorization)
+        let command = HideTopicCommand(topic: post)
+        outgoingActionsExecutor.execute(command: command, builder: builder, completion: completion)
     }
     
     func getMyBlockedUsers(cursor: String?, limit: Int, completion: @escaping (Result<UsersListResponse>) -> Void) {

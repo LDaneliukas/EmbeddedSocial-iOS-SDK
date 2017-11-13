@@ -73,7 +73,8 @@ class TopicCommand: OutgoingCommand, TopicsFeedApplicableCommand, SingleTopicApp
             PinTopicCommand.self,
             UnpinTopicCommand.self,
             UpdateTopicCommand.self,
-            ReportTopicCommand.self
+            ReportTopicCommand.self,
+            HideTopicCommand.self
         ]
     }
     
@@ -86,7 +87,8 @@ class TopicCommand: OutgoingCommand, TopicsFeedApplicableCommand, SingleTopicApp
             CreateTopicCommand.self,
             RemoveTopicCommand.self,
             UpdateTopicCommand.self,
-            ReportTopicCommand.self
+            ReportTopicCommand.self,
+            HideTopicCommand.self
         ]
     }
 }
