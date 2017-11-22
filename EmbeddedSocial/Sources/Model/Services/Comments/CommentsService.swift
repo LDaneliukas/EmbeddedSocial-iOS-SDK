@@ -232,7 +232,6 @@ class CommentsService: BaseService, CommentServiceProtocol {
         guard !hasDeletedInverseCommand else {
             return
         }
-        
         cache.cacheOutgoing(command)
         
         CommentsAPI.commentsDeleteComment(

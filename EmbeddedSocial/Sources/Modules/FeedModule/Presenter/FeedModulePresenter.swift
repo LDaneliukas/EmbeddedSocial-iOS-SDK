@@ -10,6 +10,9 @@ protocol FeedModuleInput: class {
     // Forces module to fetch all feed
     func refreshData()
     
+    func didCommentPosted(for topicHandle: PostHandle)
+    func didCommentRemoved(for topicHandle: PostHandle)
+    
     func registerHeader<T: UICollectionReusableView>(withType type: T.Type,
                         size: CGSize,
                         configurator: @escaping (T) -> Void)
@@ -214,6 +217,24 @@ class FeedModulePresenter: FeedModuleInput, FeedModuleViewOutput, FeedModuleInte
         fetchAllItems()
     }
     
+    func didCommentPosted(for topicHandle: PostHandle) {
+        guard shouldHandleCommentsUpdate(), let index = currentItems.index(where: { $0.topicHandle == topicHandle }) else {
+            return
+        }
+        var mainPost = currentItems[index]
+        mainPost.totalComments += 1
+        updateUI(with: [mainPost])
+    }
+    
+    func didCommentRemoved(for topicHandle: PostHandle) {
+        guard shouldHandleCommentsUpdate(), let index = currentItems.index(where: { $0.topicHandle == topicHandle }) else {
+            return
+        }
+        var mainPost = currentItems[index]
+        mainPost.totalComments = mainPost.totalComments > 0 ? mainPost.totalComments - 1 : 0
+        updateUI(with: [mainPost])
+    }
+    
     // MARK: Private
     
     private func collectionPaddingNeeded() -> Bool {
@@ -282,6 +303,15 @@ class FeedModulePresenter: FeedModuleInput, FeedModuleViewOutput, FeedModuleInte
         }
     }
     
+    fileprivate func shouldHandleCommentsUpdate() -> Bool {
+        switch feedType! {
+        case .single(post: _):
+            return true
+        default:
+            return false
+        }
+    }
+    
     fileprivate func checkIfNoContent() {
         if shouldShowNoContent() {
             view.needShowNoContent(state: currentItems.count == 0)
@@ -320,7 +350,6 @@ class FeedModulePresenter: FeedModuleInput, FeedModuleViewOutput, FeedModuleInte
             return
         }
         
-//        fetchRequestsInProgress = Set()
         fetchItems(with: cursor, limit: limit)
     }
     
@@ -483,6 +512,7 @@ class FeedModulePresenter: FeedModuleInput, FeedModuleViewOutput, FeedModuleInte
         if shouldFetchOnViewAppear() {
             didAskFetchAll()
         }
+
     }
     
     func didAskFetchAll() {

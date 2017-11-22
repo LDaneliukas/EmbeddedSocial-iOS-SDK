@@ -6,6 +6,11 @@
 import Foundation
 
 final class CreateCommentCommand: CommentCommand {
+    
+    override var inverseCommand: OutgoingCommand? {
+        return RemoveCommentCommand(comment: comment)
+    }
+    
     override func setRelatedHandle(_ relatedHandle: String?) {
         comment.topicHandle = relatedHandle
     }
@@ -19,11 +24,11 @@ final class CreateCommentCommand: CommentCommand {
         comments.insert(comment, at: 0)
         feed.comments = comments
     }
+    
 }
 
-
 extension CreateCommentCommand: TopicsFeedApplicableCommand {
-    
+
     func apply(to feed: inout FeedFetchResult) {
         guard let index = feed.posts.index(where: { $0.topicHandle == self.comment.topicHandle }) else {
             return
@@ -32,10 +37,13 @@ extension CreateCommentCommand: TopicsFeedApplicableCommand {
         topic.totalComments += 1
         feed.posts[index] = topic
     }
+
 }
 
 extension CreateCommentCommand: SingleTopicApplicableCommand {
+
     func apply(to topic: inout Post) {
         topic.totalComments += 1
     }
+
 }

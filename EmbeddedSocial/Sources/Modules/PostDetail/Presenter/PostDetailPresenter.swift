@@ -103,8 +103,9 @@ class PostDetailPresenter: PostDetailViewOutput, PostDetailInteractorOutput, Pos
     }
     
     func commentDidPost(comment: Comment) {
-        comments.append(comment)
+        appendWithReplacing(original: &comments, appending: [comment])
         view.postCommentSuccess()
+        feedModuleInput?.didCommentPosted(for: topicHandle)
     }
     
     func commentPostFailed(error: Error) {
@@ -190,7 +191,7 @@ extension PostDetailPresenter: CommentCellModuleOutout {
         comments.remove(at: index)
         router.backIfNeeded(from: view as! UIViewController)
         view.removeComment(index: index)
-        feedModuleInput?.refreshData()
+        feedModuleInput?.didCommentRemoved(for: topicHandle)
     }
     
     func showMenu(comment: Comment) {
@@ -232,8 +233,6 @@ extension PostDetailPresenter: Subscriber {
         let commentToUpdate = comments[idx]
         commentToUpdate.commentHandle = newHandle
         comments[idx] = commentToUpdate
-        
-        feedModuleInput?.refreshData()
     }
 }
 
