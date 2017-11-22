@@ -9,7 +9,6 @@ protocol FeedModuleInput: class {
 
     // Forces module to fetch all feed
     func refreshData()
-    
     func didCommentPosted(for topicHandle: PostHandle)
     func didCommentRemoved(for topicHandle: PostHandle)
     
@@ -512,7 +511,6 @@ class FeedModulePresenter: FeedModuleInput, FeedModuleViewOutput, FeedModuleInte
         if shouldFetchOnViewAppear() {
             didAskFetchAll()
         }
-
     }
     
     func didAskFetchAll() {

@@ -29,7 +29,6 @@ final class RemoveCommentCommand: CommentCommand {
 }
 
 extension RemoveCommentCommand: TopicsFeedApplicableCommand {
-    
     func apply(to feed: inout FeedFetchResult) {
         guard let index = feed.posts.index(where: { $0.topicHandle == self.comment.topicHandle }) else {
             return
@@ -38,13 +37,10 @@ extension RemoveCommentCommand: TopicsFeedApplicableCommand {
         topic.totalComments = topic.totalComments > 0 ? topic.totalComments - 1 : 0
         feed.posts[index] = topic
     }
-    
 }
 
 extension RemoveCommentCommand: SingleTopicApplicableCommand {
-    
     func apply(to topic: inout Post) {
         topic.totalComments = topic.totalComments > 0 ? topic.totalComments - 1 : 0
     }
-    
 }
